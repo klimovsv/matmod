@@ -10,18 +10,18 @@ runge_step = (t, start, functions, step_size) => {
         k1.push(functions[i](t,start)*step_size)
     }
     for (let i = 0 ; i < range ; i++ ){
-        k2.push(functions[i](t + step_size/2,start.map((value,i) =>{
-            return k1[i]/2 + value
+        k2.push(functions[i](t + step_size/2,start.map((value,j) =>{
+            return k1[j]/2 + value
         }))*step_size)
     }
     for (let i = 0 ; i < range ; i++ ){
-        k3.push(functions[i](t + step_size/2,start.map((value,i) =>{
-            return k2[i]/2 + value
+        k3.push(functions[i](t + step_size/2,start.map((value,j) =>{
+            return k2[j]/2 + value
         }))*step_size)
     }
     for (let i = 0 ; i < range ; i++ ){
-        k4.push(functions[i](t + step_size,start.map((value,i) =>{
-            return k3[i] + value
+        k4.push(functions[i](t + step_size,start.map((value,j) =>{
+            return k3[j] + value
         }))*step_size)
     }
     return k1.map((value,i)=>{
@@ -45,5 +45,5 @@ runge_kutt = (props) => {
         result.push(next)
     }
 
-    return result;
+    return [result,time];
 };
