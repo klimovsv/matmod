@@ -42,8 +42,7 @@ functions = (props) =>{
 
 
 my_runge_kutt = (props) => {
-    const {start_time , end_time , steps} = props;
-    const step = (end_time - start_time) / steps;
+    const {start_time , step , steps} = props;
     let {functions, start} = props;
 
     let time = [start_time];
@@ -54,6 +53,10 @@ my_runge_kutt = (props) => {
         result.push(next);
         time.push(time[time.length-1]+step);
         i++;
+    }
+    if( time.length < steps){
+        props.step = props.step / (steps / time.length + 1);
+        return my_runge_kutt(props)
     }
     return [result,time];
 };
@@ -75,6 +78,7 @@ main = () => {
         start_time:0 ,
         end_time: 10 ,
         steps : 100,
+        step : 10/100,
         functions : funcs,
         start : [0,0,v*Math.cos(ang),v*Math.sin(ang)]
     };
@@ -92,7 +96,7 @@ main = () => {
     let [gal_x,gal_y] = [[0],[0]];
     let x_drop = Math.tan(ang)*2*v*v*Math.cos(ang)*Math.cos(ang)/props.g;
     let t_drop = x_drop/(v*Math.cos(ang));
-    let steps = 20;
+    let steps = 100;
     let step_size = t_drop/steps;
     let t = [0];
     let x_func = (t) => v * Math.cos(ang) * t;
