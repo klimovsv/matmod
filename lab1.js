@@ -1,3 +1,19 @@
+let main;
+let listener = (id) =>{
+    let slider = document.getElementById(id+"range");
+    let output = document.getElementById(id+"output");
+    output.innerHTML = slider.value;
+    slider.oninput = function() {
+        output.innerHTML = this.value;
+        main()
+    };
+};
+
+listener("R");
+listener("B");
+listener("V");
+listener("P");
+
 functions = (props) =>{
     let {m, g, b} = props;
     return [
@@ -43,12 +59,16 @@ my_runge_kutt = (props) => {
 };
 
 main = () => {
+    const g = 9.8;
+    const r = document.getElementById("Rrange").value;
+    const p = document.getElementById("Prange").value;
+    const m = p * 4/3 * Math.PI * Math.pow(r,3);
     let props = {
-        m:100,
-        g:9.8,
-        b:0
+        m:m,
+        g:g,
+        b:document.getElementById("Brange").value
     };
-    const v = 10;
+    const v = document.getElementById("Vrange").value;
     const ang = Math.PI/4;
     const funcs = functions(props);
     const config = {
@@ -69,18 +89,36 @@ main = () => {
     res[res.length -1][0] = last_x;
     res[res.length -1][1] = 0;
 
-    let [gal_x,gal_y] = [[],[]];
+    let [gal_x,gal_y] = [[0],[0]];
     let x_drop = Math.tan(ang)*2*v*v*Math.cos(ang)*Math.cos(ang)/props.g;
     let t_drop = x_drop/(v*Math.cos(ang));
     let steps = 20;
     let step_size = t_drop/steps;
     let t = [0];
-
+    let x_func = (t) => v * Math.cos(ang) * t;
+    let y_func = (t) => v * Math.sin(ang) * t - g * t * t/2;
+    while (steps > 0){
+        t.push(t[t.length-1]+step_size);
+        gal_x.push(x_func(t[t.length-1]));
+        gal_y.push(y_func(t[t.length-1]));
+        steps--;
+    }
 
     let plot = document.getElementById('plot');
-    Plotly.plot( plot, [{
+    Plotly.newPlot( plot, [
+        {
         x: res.map(el => el[0]),
-        y: res.map(el => el[1]) }], {
+        y: res.map(el => el[1]),
+            mode: 'lines',
+            name: 'Newton'
+        },
+        {
+            x:gal_x,
+            y:gal_y,
+            mode: 'lines',
+            name: 'Gal'
+        }
+    ], {
         margin: { t: 0 } } );
 };
 
