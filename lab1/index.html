@@ -7,7 +7,7 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         .slidecontainer {
-            width: 80%;
+            width: 100%;
         }
 
         .slider {
@@ -82,8 +82,18 @@
         </span>
     </div>
 
+    <div>
+        <label for="Arange">A</label>
+        <span id="Aoutput">45</span>
+    </div>
+    <div class="slidecontainer">
+        <span>
+            <input type="range" min="1" max="89" value="45"  step="1" class="slider" id="Arange">
+        </span>
+    </div>
 
-    <div id="plot" style="width:80%;height:70%;"></div>
+
+    <div id="plot" style="width:100%;height:70%;"></div>
     <script src="lab1.js"></script>
 </body>
 </html>

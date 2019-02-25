@@ -1,4 +1,5 @@
 let main;
+
 let listener = (id) =>{
     let slider = document.getElementById(id+"range");
     let output = document.getElementById(id+"output");
@@ -13,6 +14,7 @@ listener("R");
 listener("B");
 listener("V");
 listener("P");
+listener("A");
 
 functions = (props) =>{
     let {m, g, b} = props;
@@ -72,13 +74,13 @@ main = () => {
         b:document.getElementById("Brange").value
     };
     const v = document.getElementById("Vrange").value;
-    const ang = Math.PI/4;
+    const ang = Math.PI * document.getElementById("Arange").value/180;
     const funcs = functions(props);
     const config = {
         start_time:0 ,
         end_time: 10 ,
-        steps : 100,
-        step : 10/100,
+        steps : 1000,
+        step : 1/100,
         functions : funcs,
         start : [0,0,v*Math.cos(ang),v*Math.sin(ang)]
     };
@@ -108,6 +110,7 @@ main = () => {
         steps--;
     }
 
+    console.log(Math.abs(gal_x[gal_x.length-1]-last_x));
     let plot = document.getElementById('plot');
     Plotly.newPlot( plot, [
         {
