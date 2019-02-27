@@ -1,5 +1,7 @@
 
 // f : (t,[x,y,...]) -> int
+
+// шаг метода Рунге-Кутта
 runge_step = (t, start, functions, step_size) => {
     let range = functions.length;
     let k1 = [];
