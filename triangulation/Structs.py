@@ -48,10 +48,8 @@ class Vec:
 
         if seg1_line2_start * seg1_line2_end >= 0 or seg2_line1_start * seg2_line1_end >= 0:
             return False
-
-        u = seg1_line2_start / (seg1_line2_start - seg1_line2_end)
-
-        return True
+        else:
+            return True
 
     @staticmethod
     def inside_triangle(vec1, vec2, p):

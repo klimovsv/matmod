@@ -2,11 +2,11 @@ from Structs import *
 import random
 import matplotlib.pyplot as plt
 
+xrange = (2, 10)
+yrange = (2, 10)
+
 
 def show_plot(triangles=None, points=None, vecs=None, circles=None):
-    xrange = (2, 10)
-    yrange = (2, 10)
-
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -72,30 +72,13 @@ def find(point, triangle: Triangle):
 
 
 def main_loop(triangles: Dict[str, Triangle], points: List[Point]):
+    triangle = list(triangles.values())[random.randint(0, len(triangles) - 1)]
     for i in range(len(points)):
-        triangle = list(triangles.values())[random.randint(0, len(triangles) - 1)]
         p = points[i]
         triangle = find(p, triangle)
 
         edges_d = {}
         next_triangles = [triangle]
-
-        # next_triangle = next_triangles.pop()
-        # triangles.pop(next_triangle.id)
-        # for j in range(len(next_triangle.edges)):
-        #     edge = next_triangle.edges[j]
-        #     edge.delete_triangle(next_triangle.id)
-        #     if edge.edged:
-        #         edges_d[edge.id] = edge
-        #     elif len(edge.triangles) == 0:
-        #         edges_d.pop(edge.id)
-        #     elif len(edge.triangles) == 1:
-        #         next_to_add = list(edge.triangles.values())[0]
-        #         edges_d[edge.id] = edge
-        #         if not next_to_add.visited:
-        #             next_to_add.visited = True
-        #             next_triangles.append(next_to_add)
-
         while len(next_triangles) != 0:
             next_triangle = next_triangles.pop()
             condition = next_triangle.delauney(p)
@@ -117,6 +100,7 @@ def main_loop(triangles: Dict[str, Triangle], points: List[Point]):
 
         new_t = generate_new(list(edges_d.values()), p)
         for t in new_t:
+            triangle = t
             triangles[t.id] = t
 
     return triangles
@@ -134,8 +118,8 @@ def generate_points(xrange, yrange, n, divisions):
     lenx = xrange[1] - xrange[0]
     leny = yrange[1] - yrange[0]
     points = []
-    sx = lenx // divisions
-    sy = leny // divisions
+    sx = lenx / divisions
+    sy = leny / divisions
     for i in range(divisions):
         for j in range(divisions):
             points += generate((xrange[0] + sx * i, xrange[0] + sx * (i + 1)),
@@ -155,12 +139,12 @@ def generate_from_points(points, p):
 
 
 def init(xrange, yrange):
-    points = generate_points(xrange, yrange, 2, 8)
+    points = generate_points(xrange, yrange, 20, 8)
     ind = 0
     p = points[ind]
 
     t = 0.2
-    n = 3
+    n = 10
     lenx = xrange[1] - xrange[0]
     leny = yrange[1] - yrange[0]
     p_s = [Point(xrange[0] - t, yrange[0] - t, edged=True)]
@@ -187,8 +171,8 @@ def init(xrange, yrange):
 
 
 def main():
-    xrange = (2, 10)
-    yrange = (2, 10)
+    # xrange = (2, 10)
+    # yrange = (2, 10)
 
     triangles, points = init(xrange, yrange)
 
