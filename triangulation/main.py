@@ -7,7 +7,12 @@ yrange = (2, 10)
 
 
 def show_plot(triangles=None, points=None, vecs=None, circles=None):
-    fig = plt.figure()
+    t = 1
+    lenx = xrange[1]-xrange[0]+2*t
+    leny = yrange[1] - yrange[0] + 2 * t
+
+    fig = plt.figure(figsize=[lenx,leny])
+    plt.autoscale(False)
     ax = fig.add_subplot(111)
 
     if triangles:
@@ -27,10 +32,13 @@ def show_plot(triangles=None, points=None, vecs=None, circles=None):
         for c in circles:
             circle = plt.Circle((c[0].x, c[0].y), c[1], color='r', fill=False)
             ax.add_artist(circle)
+
     t = 1
     ax.set_xlim(xrange[0] - t, xrange[1] + t)
     ax.set_ylim(yrange[0] - t, yrange[1] + t)
-    plt.show()
+    # plt.show()
+    plt.savefig('lab.png')
+    plt.close()
 
 
 def generate_new(edges: List[Edge], point: Point):
