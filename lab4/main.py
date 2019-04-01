@@ -22,13 +22,13 @@ if __name__ == "__main__":
     logth = np.array(list(map(math.log, th)))
     logr = np.array(list(map(math.log, r)))
     beta = np.std(logth)/np.std(logr)
-    alpha = math.exp(np.average(logth) - beta * np.average(logr))
+    alpha = math.exp(np.mean(logth) - beta * np.mean(logr))
 
     print(beta, alpha)
 
     testth = statistic[8:, ::2].reshape(-1)
     testr = statistic[8:, 1::2].reshape(-1)
 
-    results = list(map(lambda v: (v[0] - alpha * v[1] ** beta), zip(testth, testr)))
-    print(results)
+    results = list(map(lambda v: abs(v[0] - alpha * v[1] ** beta), zip(testth, testr)))
+    print(np.average(results))
     print(th)
