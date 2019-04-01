@@ -78,7 +78,7 @@ main = () => {
     const props = {
         m:m,
         g:g,
-        b:C * ro * S / 2
+        b:0
     };
     const v = document.getElementById("Vrange").value;
     const ang = Math.PI * document.getElementById("Arange").value/180;
@@ -122,6 +122,7 @@ main = () => {
         steps--;
     }
 
+    console.log(gal_x[gal_x.length-1], last_x, Math.abs(last_x-gal_x[gal_x.length-1]));
     // создание графиков
     let plot = document.getElementById('plot');
     Plotly.newPlot( plot, [

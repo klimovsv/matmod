@@ -31,3 +31,4 @@ if __name__ == "__main__":
 
     results = list(map(lambda v: (v[0] - alpha * v[1] ** beta), zip(testth, testr)))
     print(results)
+    print(th)
