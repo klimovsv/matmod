@@ -1,6 +1,7 @@
 import numpy as np
 import math
-                    #   tha0     ra0     tha1    ra1    thb0     rb0     thb1    rb1     thc0    rc0    thc1   rc1
+
+#   tha0     ra0     tha1    ra1    thb0     rb0     thb1    rb1     thc0    rc0    thc1   rc1
 statistic = np.array([[16.551, 14.899, 30.746, 27.320, 32.822, 29.553, 21.002, 18.793, 17.084, 15.365, 4.544, 3.118],
                       [16.810, 14.292, 22.558, 20.155, 25.314, 22.567, 40.022, 35.436, 29.096, 25.876, 17.519, 16.162],
                       [14.434, 13.046, 28.001, 24.916, 36.918, 32.720, 35.118, 31.145, 38.639, 34.226, 38.841, 34.819],
@@ -15,20 +16,36 @@ statistic = np.array([[16.551, 14.899, 30.746, 27.320, 32.822, 29.553, 21.002, 1
                       [14.345, 12.968, 18.573, 16.668, 32.822, 29.553, 29.751, 27.282, 37.085, 33.283, 37.324, 33.492]])
 
 
+def generateF(array, l, r, n):
+    step = (r - l) / n
+    n_entries = len(array)
+    F = []
+    for i in range(1, 1 + n):
+        tmp = list(filter(lambda v: v <= l + step * i, array))
+        F.append(len(tmp) / n_entries)
+    return F
+
 
 if __name__ == "__main__":
     th = statistic[:8, ::2].reshape(-1)
     r = statistic[:8, 1::2].reshape(-1)
-    logth = np.array(list(map(math.log, th)))
-    logr = np.array(list(map(math.log, r)))
-    beta = np.std(logth)/np.std(logr)
+    logth = np.log(th)
+    logr = np.log(r)
+    beta = np.std(logth) / np.std(logr)
     alpha = math.exp(np.mean(logth) - beta * np.mean(logr))
 
-    print(beta, alpha)
+    testth = statistic[:, :1:2].reshape(-1)
+    testr = statistic[:, 1:2:2].reshape(-1)
+    testthapr = np.array(list(map(lambda v: alpha * v ** beta, testr)))
 
-    testth = statistic[8:, ::2].reshape(-1)
-    testr = statistic[8:, 1::2].reshape(-1)
+    sortedtest = np.sort(testth)
+    sortedtestapr = np.sort(testthapr)
 
-    results = list(map(lambda v: abs(v[0] - alpha * v[1] ** beta), zip(testth, testr)))
-    print(np.average(results))
-    print(th)
+    left = min(sortedtestapr[0], sortedtest[0])
+    right = max(sortedtestapr[-1], sortedtest[-1])
+    steps = 4
+    F1 = generateF(sortedtest, left, right, steps)
+    F2 = generateF(sortedtestapr, left, right, steps)
+    res = max(map(lambda v: abs(v[0] - v[1]), zip(F1, F2)))
+    print(alpha, beta)
+    print(res)
