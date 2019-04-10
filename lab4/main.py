@@ -1,6 +1,8 @@
 import numpy as np
 import math
+from numpy import genfromtxt
 
+lab3_table = genfromtxt('lab3.csv', delimiter=',')[1:, :-1]
 #   tha0     ra0     tha1    ra1    thb0     rb0     thb1    rb1     thc0    rc0    thc1   rc1
 statistic = np.array([[16.551, 14.899, 30.746, 27.320, 32.822, 29.553, 21.002, 18.793, 17.084, 15.365, 4.544, 3.118],
                       [16.810, 14.292, 22.558, 20.155, 25.314, 22.567, 40.022, 35.436, 29.096, 25.876, 17.519, 16.162],
@@ -16,6 +18,16 @@ statistic = np.array([[16.551, 14.899, 30.746, 27.320, 32.822, 29.553, 21.002, 1
                       [14.345, 12.968, 18.573, 16.668, 32.822, 29.553, 29.751, 27.282, 37.085, 33.283, 37.324, 33.492]])
 
 
+def get_alpha(ksi1, ksi2):
+    ksi1 = np.array(list(map(lambda x: x * 1000, ksi1)))
+    ksi2 = np.array(list(map(lambda x: x * 1000, ksi2)))
+    logth = np.log(ksi1)
+    logr = np.log(ksi2)
+    beta = np.std(logth) / np.std(logr)
+    alpha = math.exp(np.mean(logth) - beta * np.mean(logr))
+    return alpha, beta
+
+
 def generateF(array, l, r, n):
     step = (r - l) / n
     n_entries = len(array)
@@ -26,19 +38,9 @@ def generateF(array, l, r, n):
     return F
 
 
-if __name__ == "__main__":
-    th = statistic[:8, ::2].reshape(-1)
-    r = statistic[:8, 1::2].reshape(-1)
-    logth = np.log(th)
-    logr = np.log(r)
-    beta = np.std(logth) / np.std(logr)
-    alpha = math.exp(np.mean(logth) - beta * np.mean(logr))
-
-    testth = statistic[:, :1:2].reshape(-1)
-    testr = statistic[:, 1:2:2].reshape(-1)
-    testthapr = np.array(list(map(lambda v: alpha * v ** beta, testr)))
-
-    sortedtest = np.sort(testth)
+def test(ksi1t, ksi2t, alpha, beta):
+    testthapr = np.array(list(map(lambda v: alpha * (v * 1000) ** beta, ksi2t)))
+    sortedtest = np.sort(np.array(list(map(lambda x: x * 1000, ksi1t))))
     sortedtestapr = np.sort(testthapr)
 
     left = min(sortedtestapr[0], sortedtest[0])
@@ -47,5 +49,57 @@ if __name__ == "__main__":
     F1 = generateF(sortedtest, left, right, steps)
     F2 = generateF(sortedtestapr, left, right, steps)
     res = max(map(lambda v: abs(v[0] - v[1]), zip(F1, F2)))
-    print(alpha, beta)
+    return res
+
+
+def filtered(arr):
+    return np.array(list(filter(lambda x: not np.isnan(x), arr.reshape(-1))))
+
+
+def main():
+    th = statistic[:, ::2].reshape(-1)
+    r = statistic[:, 1::2].reshape(-1)
+    alpha, beta = get_alpha(th, r)
+    print(alpha,beta)
+    testth = statistic[:, :4:2].reshape(-1)
+    testr = statistic[:, 1:5:2].reshape(-1)
+    res = test(testth, testr, alpha, beta)
+
+    alphas = []
+    betas = []
+    ksi3 = filtered(lab3_table[::3, ::2])
+    ksi4 = filtered(lab3_table[::3, 1::2])
+    ksi5 = filtered(lab3_table[1::3, 1::2])
+    ksi6 = filtered(lab3_table[2::3, 1::2])
+    for i, arr in enumerate([ksi4, ksi5, ksi6]):
+        a, b = get_alpha(ksi3, arr)
+        alphas.append(a)
+        betas.append(b)
+
+    testksi3 = filtered(lab3_table[::3, 8::2])
+    testksi4 = filtered(lab3_table[::3, 9::2])
+    testksi5 = filtered(lab3_table[1::3, 9::2])
+    testksi6 = filtered(lab3_table[2::3, 9::2])
+    for i, arr in enumerate([testksi4, testksi5, testksi6]):
+        res = test(testksi3, arr, alphas[i], betas[i])
+        print( alphas[i], betas[i])
+
+    alpha3, beta3 = 3.882, 1.012
+    ksi2 = 857038
+    ksi1 = alpha * ksi2 ** beta
+    ksi3 = (ksi1 / alpha3) ** (1 / beta3)
+    ksi4 = (ksi3 / alphas[0]) ** (1 / betas[0])
+    ksi5 = (ksi3 / alphas[1]) ** (1 / betas[1])
+    ksi6 = (ksi3 / alphas[2]) ** (1 / betas[2])
+
+    buy_sum = ksi4 + ksi5 + ksi6
+    S = ksi4 * 0.5 * 24 + ksi5 * 0.25 * 36 + ksi6 * 0.25 * 110
+    Smean = S/buy_sum
+    res = Smean * ksi2
+    print(Smean)
+    print(ksi1)
     print(res)
+
+
+if __name__ == "__main__":
+    main()
