@@ -2,20 +2,24 @@ from Cluster import *
 import numpy as np
 import operator
 import matplotlib.pyplot as plt
+import itertools
+
+lables = ["Sex", "Length", "Diameter", "Height", "Whole wheight", "Shucked weight",
+          "Viscera weight", "Shell weight", "Rings"]
+
+fig, ax = plt.subplots(nrows=8, ncols=8, figsize=(30, 30))
 
 def compare(old_centers, new_centers):
     lst = list(zip(old_centers, new_centers))
     return all(map(lambda c: np.allclose(c[0].vector - c[1].vector, np.zeros(c[0].vector.shape[0])), lst))
 
 
-def main():
+def kmeans(dataset, x_idx, y_idx):
+    n = 200
     colors = ['green', 'red', 'blue']
     k_clusters = len(colors)
 
-    data = np.genfromtxt('abalone.data', delimiter=',')
-
-    points = list(map(lambda x: Point(x), data[:100, 4:6]))
-    np.random.shuffle(points)
+    points = list(map(lambda x: Point(x), dataset[:n, [x_idx, y_idx]]))
     kpoints = points[:k_clusters]
     clusters = list(map(lambda x: Cluster(x), kpoints))
     stationary_count = 0
@@ -41,15 +45,33 @@ def main():
         else:
             stationary_count = 0
 
-        if stationary_count == 3:
+        if stationary_count == 2:
             break
 
+    plot = ax[x_idx-1][y_idx-1]
+    plot.tick_params(
+        which='both',
+        bottom='off',
+        left='off',
+        right='off',
+        top='off'
+    )
     for p in points:
         vec = p.vector
-        plt.scatter(vec[0], vec[1], color=colors[p.cluster_nmb])
+        plot.scatter(vec[0], vec[1], color=colors[p.cluster_nmb])
 
-    plt.show()
+    plot.set_xlabel(lables[x_idx])
+    plot.set_ylabel(lables[y_idx])
 
+
+def main():
+    data = np.genfromtxt('abalone.data', delimiter=',')
+    np.random.shuffle(data)
+    pairs = list(itertools.product(range(1, len(lables)), range(1, len(lables))))
+    for x, y in pairs:
+        kmeans(data, x, y)
+    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    plt.savefig("res.png")
 
 
 if __name__ == '__main__':
