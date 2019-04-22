@@ -4,8 +4,10 @@ import operator
 
 class Point:
     def __init__(self, vector):
+        # print(vector)
         self.id = uuid.uuid4()
-        self.vector = vector
+        self.class_label = vector[-1]
+        self.vector = vector[:-1]
         self.cluster_nmb = -1
 
     def dist(self, other):
@@ -30,7 +32,7 @@ class Cluster:
         res_vec = np.zeros(lst[0].shape[0])
         for p in lst:
             res_vec += p
-        self.center = Point(res_vec / len(points))
+        self.center = Point(np.concatenate((res_vec / len(points), np.array([0]))))
 
     def dist(self, point: Point):
         return self.center.dist(point)

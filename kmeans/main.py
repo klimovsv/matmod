@@ -3,23 +3,29 @@ import numpy as np
 import operator
 import matplotlib.pyplot as plt
 import itertools
-
+import pandas
 lables = ["Sex", "Length", "Diameter", "Height", "Whole wheight", "Shucked weight",
           "Viscera weight", "Shell weight", "Rings"]
 
 fig, ax = plt.subplots(nrows=8, ncols=8, figsize=(30, 30))
+
 
 def compare(old_centers, new_centers):
     lst = list(zip(old_centers, new_centers))
     return all(map(lambda c: np.allclose(c[0].vector - c[1].vector, np.zeros(c[0].vector.shape[0])), lst))
 
 
-def kmeans(dataset, x_idx, y_idx):
-    n = 200
+def predict(clusters, point):
+    best = min(enumerate(clusters), key=lambda v: v[1].dist(point))
+    return best[0]
+
+
+def kmeans(dataset, idx, class_coord):
+    n = 500
     colors = ['green', 'red', 'blue']
     k_clusters = len(colors)
 
-    points = list(map(lambda x: Point(x), dataset[:n, [x_idx, y_idx]]))
+    points = list(map(lambda x: Point(x), dataset[:n, idx + [class_coord]]))
     kpoints = points[:k_clusters]
     clusters = list(map(lambda x: Cluster(x), kpoints))
     stationary_count = 0
@@ -48,30 +54,54 @@ def kmeans(dataset, x_idx, y_idx):
         if stationary_count == 2:
             break
 
-    plot = ax[x_idx-1][y_idx-1]
-    plot.tick_params(
-        which='both',
-        bottom='off',
-        left='off',
-        right='off',
-        top='off'
-    )
-    for p in points:
-        vec = p.vector
-        plot.scatter(vec[0], vec[1], color=colors[p.cluster_nmb])
+    if len(idx) == 2:
+        x_idx = idx[0]
+        y_idx = idx[1]
+        plot = ax[x_idx - 1][y_idx - 1]
+        plot.tick_params(
+            which='both',
+            bottom='off',
+            left='off',
+            right='off',
+            top='off'
+        )
+        for p in points:
+            vec = p.vector
+            plot.scatter(vec[0], vec[1], color=colors[p.cluster_nmb])
 
-    plot.set_xlabel(lables[x_idx])
-    plot.set_ylabel(lables[y_idx])
+        plot.set_xlabel(lables[x_idx])
+        plot.set_ylabel(lables[y_idx])
+
+    return clusters, cluster_points
 
 
 def main():
-    data = np.genfromtxt('abalone.data', delimiter=',')
+    # data = np.loadtxt('abalone.data', delimiter=',')
+    data = pandas.read_csv('abalone.data', sep=",", header=None)
+    data = np.array(list(filter(lambda x: x[0] == 'F', data.values)))
+    data[:, [0]] = np.zeros(len(data)).reshape((len(data), 1))
+    data = np.array(data.tolist(), dtype=float)
     np.random.shuffle(data)
-    pairs = list(itertools.product(range(1, len(lables)), range(1, len(lables))))
-    for x, y in pairs:
-        kmeans(data, x, y)
-    plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
-    plt.savefig("res.png")
+
+    two_features = False
+    if two_features:
+        pairs = list(itertools.product(range(1, len(lables)), range(1, len(lables))))
+        for x, y in pairs:
+            kmeans(data, [x, y], -1)
+        plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+        plt.savefig("res.png")
+    else:
+        ind = [1, 2, 4]
+        clusters, cluster_points = kmeans(data, ind, -1)
+        for i, points in cluster_points.items():
+            labels = list(map(operator.attrgetter('class_label'), points))
+            avg = sum(labels) / len(points)
+            print(avg, max(labels), min(labels), np.std(labels), i)
+
+        point = Point(data[500, ind + [-1]])
+        print(point.class_label)
+        best = predict(clusters, point)
+        print(best)
 
 
 if __name__ == '__main__':
