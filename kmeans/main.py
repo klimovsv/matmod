@@ -21,11 +21,14 @@ def predict(clusters, point):
 
 
 def kmeans(dataset, idx, class_coord):
-    n = 500
-    colors = ['green', 'red', 'blue']
-    k_clusters = len(colors)
+    n = 200
+    points = list(map(lambda x: Point(x), dataset[:, idx + [class_coord]]))
 
-    points = list(map(lambda x: Point(x), dataset[:n, idx + [class_coord]]))
+    colors = ['green', 'red', 'blue']
+    labels_set = set(map(operator.attrgetter('class_label'), points))
+    k_clusters = len(labels_set)
+    print(k_clusters)
+
     kpoints = points[:k_clusters]
     clusters = list(map(lambda x: Cluster(x), kpoints))
     stationary_count = 0
@@ -78,9 +81,9 @@ def kmeans(dataset, idx, class_coord):
 def main():
     # data = np.loadtxt('abalone.data', delimiter=',')
     data = pandas.read_csv('abalone.data', sep=",", header=None)
-    data = np.array(list(filter(lambda x: x[0] == 'F', data.values)))
+    data = np.array(list(filter(lambda x: x[0] == 'M', data.values)))
     data[:, [0]] = np.zeros(len(data)).reshape((len(data), 1))
-    data = np.array(data.tolist(), dtype=float)
+    data = np.array(data.tolist(), dtype=np.float)
     np.random.shuffle(data)
 
     two_features = False
@@ -91,7 +94,7 @@ def main():
         plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
         plt.savefig("res.png")
     else:
-        ind = [1, 2, 4]
+        ind = [1, 3, 5,7]
         clusters, cluster_points = kmeans(data, ind, -1)
         for i, points in cluster_points.items():
             labels = list(map(operator.attrgetter('class_label'), points))
