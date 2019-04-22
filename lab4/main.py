@@ -3,6 +3,8 @@ import math
 from numpy import genfromtxt
 
 lab3_table = genfromtxt('lab3.csv', delimiter=',')[1:, :-1]
+lab2_table = genfromtxt('lab2.csv', delimiter=',')[1:]
+
 #   tha0     ra0     tha1    ra1    thb0     rb0     thb1    rb1     thc0    rc0    thc1   rc1
 statistic = np.array([[16.551, 14.899, 30.746, 27.320, 32.822, 29.553, 21.002, 18.793, 17.084, 15.365, 4.544, 3.118],
                       [16.810, 14.292, 22.558, 20.155, 25.314, 22.567, 40.022, 35.436, 29.096, 25.876, 17.519, 16.162],
@@ -56,14 +58,68 @@ def filtered(arr):
     return np.array(list(filter(lambda x: not np.isnan(x), arr.reshape(-1))))
 
 
+def test_hypot():
+    # hypot 1
+    th = statistic[:8, ::2].reshape(-1)
+    r = statistic[:8, 1::2].reshape(-1)
+    alpha, beta = get_alpha(th, r)
+
+    testth = statistic[8:, ::2].reshape(-1)
+    testr = statistic[8:, 1::2].reshape(-1)
+    res = test(testth, testr, alpha, beta)
+    allowed = np.sqrt(np.abs(0.5 * np.log(beta)))
+    print(alpha, beta, res, allowed)
+
+    # hypot2
+    tha0 = filtered(lab2_table[:, 0])
+    tha1 = filtered(lab2_table[:, 2])
+    thb0 = filtered(lab2_table[:, 4])
+    thb1 = filtered(lab2_table[:, 6])
+    thc0 = filtered(lab2_table[:, 8])
+    thc1 = filtered(lab2_table[:, 10])
+    th = np.concatenate((tha0[::2], tha1[::2], thb0[::2], thb1[::2], thc0[::2], thc1[::2]))
+    th_test = np.concatenate((tha0[1::2], tha1[1::2], thb0[1::2], thb1[1::2], thc0[1::2], thc1[1::2]))
+
+    LL = filtered(lab2_table[::2, 1::2])
+    LL_test = filtered(lab2_table[1::2, 1::2])
+
+    alpha3, beta3 = get_alpha(th, LL)
+    res = test(th_test, LL_test, alpha, beta)
+    allowed = np.sqrt(np.abs(0.5 * np.log(beta3)))
+    print(alpha3, beta3, res, allowed)
+
+    # hypot 3
+    alphas = []
+    betas = []
+    ksi3 = filtered(lab3_table[::3, :8:2])
+    ksi4 = filtered(lab3_table[::3, 1:9:2])
+    ksi5 = filtered(lab3_table[1::3, 1:9:2])
+    ksi6 = filtered(lab3_table[2::3, 1:9:2])
+    for i, arr in enumerate([ksi4, ksi5, ksi6]):
+        a, b = get_alpha(ksi3, arr)
+        alphas.append(a)
+        betas.append(b)
+
+    testksi3 = filtered(lab3_table[::3, 8::2])
+    testksi4 = filtered(lab3_table[::3, 9::2])
+    testksi5 = filtered(lab3_table[1::3, 9::2])
+    testksi6 = filtered(lab3_table[2::3, 9::2])
+    for i, arr in enumerate([testksi4, testksi5, testksi6]):
+        res = test(testksi3, arr, alphas[i], betas[i])
+        allowed = np.sqrt(np.abs(0.5 * np.log(betas[i])))
+        print(alphas[i], betas[i], res, allowed)
+
+
 def main():
     th = statistic[:, ::2].reshape(-1)
     r = statistic[:, 1::2].reshape(-1)
     alpha, beta = get_alpha(th, r)
-    print(alpha,beta)
-    testth = statistic[:, :4:2].reshape(-1)
-    testr = statistic[:, 1:5:2].reshape(-1)
-    res = test(testth, testr, alpha, beta)
+    print(alpha, beta)
+
+    th = filtered(lab2_table[:, ::2])
+    LL = filtered(lab2_table[:, 1::2])
+    alpha3, beta3 = get_alpha(th, LL)
+    print(alpha3, beta3)
 
     alphas = []
     betas = []
@@ -76,15 +132,6 @@ def main():
         alphas.append(a)
         betas.append(b)
 
-    testksi3 = filtered(lab3_table[::3, 8::2])
-    testksi4 = filtered(lab3_table[::3, 9::2])
-    testksi5 = filtered(lab3_table[1::3, 9::2])
-    testksi6 = filtered(lab3_table[2::3, 9::2])
-    for i, arr in enumerate([testksi4, testksi5, testksi6]):
-        res = test(testksi3, arr, alphas[i], betas[i])
-        print( alphas[i], betas[i])
-
-    alpha3, beta3 = 3.882, 1.012
     ksi2 = 857038
     ksi1 = alpha * ksi2 ** beta
     ksi3 = (ksi1 / alpha3) ** (1 / beta3)
@@ -94,7 +141,7 @@ def main():
 
     buy_sum = ksi4 + ksi5 + ksi6
     S = ksi4 * 0.5 * 24 + ksi5 * 0.25 * 36 + ksi6 * 0.25 * 110
-    Smean = S/buy_sum
+    Smean = S / buy_sum
     res = Smean * ksi2
     print(Smean)
     print(ksi1)
@@ -102,4 +149,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_hypot()
+    # main()
