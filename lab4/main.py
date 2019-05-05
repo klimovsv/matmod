@@ -144,10 +144,11 @@ def main():
     Smean = S / buy_sum
     res = Smean * ksi2
     print(Smean)
+    print(S)
     print(ksi1)
     print(res)
 
 
 if __name__ == "__main__":
-    test_hypot()
-    # main()
+    # test_hypot()
+    main()
