@@ -67,6 +67,8 @@ def test(ksi1t, ksi2t, alpha, beta):
 def filtered(arr):
     return np.array(list(filter(lambda x: not np.isnan(x), arr.reshape(-1))))
 
+def print_res(*args):
+    print("alpha: {}, beta: {}, criteria: {}, eps: {}".format(*args))
 
 def test_hypot():
     # hypot 1
@@ -78,7 +80,7 @@ def test_hypot():
     testr = table_part1[6:, 1::2].reshape(-1)
     res = test(testth, testr, alpha, beta)
     allowed = np.sqrt(np.abs(0.5 * np.log(beta)))
-    print(alpha, beta, res, allowed)
+    print_res(alpha, beta, res, allowed)
 
     # hypot2
     tha0 = filtered(table_part2[:, 0])
@@ -96,7 +98,7 @@ def test_hypot():
     alpha3, beta3 = get_alpha(th, LL)
     res = test(th_test, LL_test, alpha, beta)
     allowed = np.sqrt(np.abs(0.5 * np.log(beta3)))
-    print(alpha3, beta3, res, allowed)
+    print_res(alpha3, beta3, res, allowed)
 
     # hypot 3
     alphas = []
@@ -117,30 +119,30 @@ def test_hypot():
     for i, arr in enumerate([testksi4, testksi5, testksi6]):
         res = test(testksi3, arr, alphas[i], betas[i])
         allowed = np.sqrt(np.abs(0.5 * np.log(betas[i])))
-        print(alphas[i], betas[i], res, allowed)
+        print_res(alphas[i], betas[i], res, allowed)
 
     ksi2 = 857038
     ksi1 = alpha * ksi2 ** beta
     ksi3 = (ksi1 / alpha3) ** (1 / beta3)
-    print(alphas, betas)
+    # print(alphas, betas)
     betas[0] = 1
     alphas[0] = np.mean(filtered(table_part3[::3, :8:2]))/np.mean(filtered(table_part3[::3, 1:9:2]))
-    print(alphas, betas)
+    # print(alphas, betas)
     ksi4 = (ksi3 / alphas[0]) ** (1 / betas[0])
     ksi5 = (ksi3 / alphas[1]) ** (1 / betas[1])
     ksi6 = (ksi3 / alphas[2]) ** (1 / betas[2])
 
     buy_sum = ksi4 + ksi5 + ksi6
     pksi4, pksi5, pksi6 = ksi4 / buy_sum, ksi5 / buy_sum, ksi6 / buy_sum
-    print(pksi4, pksi5, pksi6)
-    print(pksi4 + pksi5 + pksi6)
+    # print(pksi4, pksi5, pksi6)
+    # print(pksi4 + pksi5 + pksi6)
 
     S = ksi4 * pksi4 * 24 + ksi5 * pksi5 * 36 + ksi6 * pksi6 * 110
     Smean = S / buy_sum
     res = Smean * ksi2
-    print(Smean)
+    print("average: ", Smean)
     print(ksi1)
-    print(res)
+    print("daily income: ", res)
 
 
 def main():
